@@ -1,0 +1,891 @@
+
+// ==========================================================================
+// $VARIABLES
+// ==========================================================================
+
+
+//
+// Base colors
+//
+@blue: #0089ec;
+@blue-hover: #b1dcfb;
+@black: #000;
+@white: #fff;
+
+
+//
+// Backgrounds
+//
+@bg-white: @white;
+@bg-grey-light: #f2f2f2;
+
+
+//
+// Borders
+//
+@border-grey: #777;
+@border-grey-light: #ddd;
+@border-select: darken( @border-grey-light, 15% );
+
+
+//
+// Buttons
+//
+@clear-red: #e20;
+
+
+
+
+
+//
+// Picker base
+//
+
+// Make sure nothing is above the picker.
+@picker-z-index: 10000;
+
+// Animation speeds.
+@speed-animate-in: .15s;
+
+// Focused input border color.
+@input-active-border: @blue;
+
+// Typography.
+@base-font-size: 16px;
+@base-line-height: 1.2;
+
+// Corners.
+@picker-border-radius: 5px;
+
+// Drop shadows.
+@picker-box-shadow: 0 12px 36px 16px rgba(0,0,0,.24);
+@picker-box-shadow-light: 0 6px 18px 1px rgba(0,0,0,.12);
+
+// Height breakpoints.
+@breakpoint-tiny: 26.5em; // 424px @ 16px
+@breakpoint-small: 33.875em; // 542px @ 16px
+@breakpoint-medium: 40.125em; // 642px @ 16px
+@breakpoint-large: 46.75em; // 748px @ 16px
+
+// Width breakpoints.
+@breakpoint-width-tiny: 24.5em; // 392px @ 16px
+
+
+
+
+//
+// Date picker options
+//
+
+// The year and weekday labels.
+@year-weekday-label: #999;
+
+// “Today” tag indicators.
+@blue-tag: #0059bc;
+@disabled-tag: #aaa;
+
+// Disabled things.. such as days, month nav, etc.
+@disabled-things-bg: #f5f5f5;
+@disabled-things-text: #ddd;
+@disabled-highlighted-things-bg: #bbb;
+
+
+
+
+
+//
+// Theme configurations
+//
+
+// The “default” min & max widths.
+@picker-min-width: 256px;
+@picker-max-width: 666px;
+
+// The time picker min & max widths.
+@time-min-width: @picker-min-width;
+@time-max-width: 320px;
+
+// The “classic” theme settings.
+@classic-max-width: @picker-max-width - 200px;
+@classic-min-width: @picker-min-width - 80px;
+@classic-max-height: 25em;
+@classic-box-shadow: 0 6px 18px 1px rgba(0,0,0,.12);
+
+
+
+
+
+
+
+
+// ==========================================================================
+// $MIXINS
+// ==========================================================================
+
+
+//
+// Common picker item states
+//
+
+// Highlighted.
+.picker-item-highlighted () {
+    border-color: @blue;
+}
+
+// Hovered.
+.picker-item-hovered () {
+    cursor: pointer;
+    color: @black;
+    background: @blue-hover;
+}
+
+// Selected.
+.picker-item-selected () {
+    background: @blue;
+    color: @white;
+}
+
+// Disabled.
+.picker-item-disabled () {
+    background: @disabled-things-bg;
+    border-color: @disabled-things-bg;
+    color: @disabled-things-text;
+    cursor: default;
+}
+
+
+
+
+//
+// Opacity
+//
+.opacity( @decimal ) {
+    @percent: @decimal * 100;
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=@{percent})";
+    filter: ~"alpha(opacity=@{percent})";
+    -moz-opacity: @decimal;
+         opacity: @decimal;
+}
+
+
+/* ==========================================================================
+   $BASE-PICKER
+   ========================================================================== */
+
+
+/**
+ * Note: the root picker element should *NOT* be styled more than what’s here.
+ */
+.picker {
+
+    // The base font stylings.
+    font-size: @base-font-size;
+    text-align: left;
+    line-height: @base-line-height;
+    color: @black;
+
+    // The picker shouldn’t affect or be affected by elements around it.
+    position: absolute;
+    z-index: @picker-z-index;
+
+    // The picker shouldn’t be selectable.
+    user-select: none;
+}
+
+
+/**
+ * The picker input element.
+ */
+.picker__input {
+    cursor: default;
+}
+
+
+/**
+ * When the picker is opened, the input element is “activated”.
+ */
+.picker__input.picker__input--active {
+    border-color: @input-active-border;
+}
+
+
+/**
+ * The holder is the only “scrollable” top-level container element.
+ */
+.picker__holder {
+    width: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+
+
+
+/* ==========================================================================
+   $BASE-DATE-PICKER
+   ========================================================================== */
+
+/**
+ * The picker box.
+ */
+.picker__box {
+    padding: 0 1em;
+}
+
+
+/**
+ * The header containing the month and year stuff.
+ */
+.picker__header {
+    text-align: center;
+    position: relative;
+    margin-top: .75em;
+}
+
+
+/**
+ * The month and year labels.
+ */
+.picker__month,
+.picker__year {
+    font-weight: 500;
+    display: inline-block;
+    margin-left: .25em;
+    margin-right: .25em;
+}
+.picker__year {
+    color: @year-weekday-label;
+    font-size: .8em;
+    font-style: italic;
+}
+
+
+/**
+ * The month and year selectors.
+ */
+.picker__select--month,
+.picker__select--year {
+    border: 1px solid @border-select;
+    height: 2em;
+    padding: .5em; // For firefox
+    margin-left: .25em;
+    margin-right: .25em;
+
+    // For `tiny` width screens, move it up a bit.
+    @media ( min-width: @breakpoint-width-tiny ) {
+        margin-top: -.5em;
+    }
+}
+.picker__select--month {
+    width: 35%;
+}
+.picker__select--year {
+    width: 22.5%;
+}
+.picker__select--month:focus,
+.picker__select--year:focus {
+    border-color: @blue;
+}
+
+
+/**
+ * The month navigation buttons.
+ */
+.picker__nav--prev,
+.picker__nav--next {
+    position: absolute;
+    padding: .5em 1.25em;
+    width: 1em;
+    height: 1em;
+    box-sizing: content-box;
+    top: -.25em;
+
+    // For `tiny` width screens, move it up a bit.
+    @media ( min-width: @breakpoint-width-tiny ) {
+        top: -.33em;
+    }
+}
+.picker__nav--prev {
+    left: -1em;
+    padding-right: 1.25em;
+
+    // For `tiny` width screens, increase the padding a bit.
+    @media ( min-width: @breakpoint-width-tiny ) {
+        padding-right: 1.5em;
+    }
+}
+.picker__nav--next {
+    right: -1em;
+    padding-left: 1.25em;
+
+    // For `tiny` width screens, increase the padding a bit.
+    @media ( min-width: @breakpoint-width-tiny ) {
+        padding-left: 1.5em;
+    }
+}
+.picker__nav--prev:before,
+.picker__nav--next:before {
+    content: " ";
+    border-top: .5em solid transparent;
+    border-bottom: .5em solid transparent;
+    border-right: .75em solid @black;
+    width: 0;
+    height: 0;
+    display: block;
+    margin: 0 auto;
+}
+.picker__nav--next:before {
+    border-right: 0;
+    border-left: .75em solid @black;
+}
+
+// Hovered date picker items.
+.picker__nav--prev:hover,
+.picker__nav--next:hover {
+    .picker-item-hovered;
+}
+
+// Disabled month nav.
+.picker__nav--disabled,
+.picker__nav--disabled:hover,
+.picker__nav--disabled:before,
+.picker__nav--disabled:before:hover {
+    cursor: default;
+    background: none;
+    border-right-color: @disabled-things-bg;
+    border-left-color: @disabled-things-bg;
+}
+
+
+
+
+/**
+ * The calendar table of dates
+ */
+.picker__table {
+    text-align: center;
+    border-collapse: collapse;
+    border-spacing: 0;
+    table-layout: fixed;
+    font-size: inherit;
+    width: 100%;
+    margin-top: .75em;
+    margin-bottom: .5em;
+
+    // For `small` screens, increase the spacing a tad.
+    @media ( min-height: @breakpoint-small ) {
+        margin-bottom: .75em;
+    }
+}
+
+// Remove browser stylings on a table cell.
+.picker__table td {
+    margin: 0;
+    padding: 0;
+}
+
+
+/**
+ * The weekday labels
+ */
+.picker__weekday {
+    width: 14.285714286%; // 100/7
+    font-size: .75em;
+    padding-bottom: .25em;
+    color: @year-weekday-label;
+    font-weight: 500;
+
+    /* Increase the spacing a tad */
+    @media ( min-height: @breakpoint-small ) {
+        padding-bottom: .5em;
+    }
+}
+
+
+/**
+ * The days on the calendar
+ */
+.picker__day {
+    padding: .3125em 0;
+    font-weight: 200;
+    border: 1px solid transparent;
+}
+
+// Today.
+.picker__day--today {
+    position: relative;
+}
+.picker__day--today:before {
+    content: " ";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 0;
+    height: 0;
+    border-top: .5em solid @blue-tag;
+    border-left: .5em solid transparent;
+}
+
+// Disabled day.
+.picker__day--disabled:before {
+    border-top-color: @disabled-tag;
+}
+
+// Out of focus days.
+.picker__day--outfocus {
+    color: @disabled-things-text;
+}
+
+// Hovered date picker items.
+.picker__day--infocus:hover,
+.picker__day--outfocus:hover {
+    .picker-item-hovered;
+}
+
+// Highlighted and hovered/focused dates.
+.picker__day--highlighted {
+    .picker-item-highlighted;
+}
+.picker__day--highlighted:hover,
+.picker--focused .picker__day--highlighted {
+    .picker-item-hovered;
+}
+
+// Selected and hovered/focused dates.
+.picker__day--selected,
+.picker__day--selected:hover,
+.picker--focused .picker__day--selected {
+    .picker-item-selected;
+}
+
+// Disabled dates.
+.picker__day--disabled,
+.picker__day--disabled:hover,
+.picker--focused .picker__day--disabled {
+    .picker-item-disabled;
+}
+
+// Disabled and highlighted dates.
+.picker__day--highlighted.picker__day--disabled,
+.picker__day--highlighted.picker__day--disabled:hover {
+    background: @disabled-highlighted-things-bg;
+}
+
+
+/**
+ * The footer containing the "today", "clear", and "close" buttons.
+ */
+.picker__footer {
+    text-align: center;
+}
+
+// Today, clear, and close buttons.
+.picker__button--today,
+.picker__button--clear,
+.picker__button--close {
+    border: 1px solid @white;
+    background: @white;
+    font-size: .8em;
+    padding: .66em 0;
+    font-weight: bold;
+    width: 33%;
+    display: inline-block;
+    vertical-align: bottom;
+}
+.picker__button--today:hover,
+.picker__button--clear:hover,
+.picker__button--close:hover {
+    .picker-item-hovered;
+    border-bottom-color: @blue-hover;
+}
+.picker__button--today:focus,
+.picker__button--clear:focus,
+.picker__button--close:focus {
+    background: @blue-hover;
+    border-color: @blue;
+    outline: none;
+}
+
+// Today, clear, and close “indicators”.
+.picker__button--today:before,
+.picker__button--clear:before,
+.picker__button--close:before {
+    position: relative;
+    display: inline-block;
+    height: 0;
+}
+.picker__button--today:before,
+.picker__button--clear:before {
+    content: " ";
+    margin-right: .45em;
+}
+.picker__button--today:before {
+    top: -.05em;
+    width: 0;
+    border-top: .66em solid @blue-tag;
+    border-left: .66em solid transparent;
+}
+.picker__button--clear:before {
+    top: -.25em;
+    width: .66em;
+    border-top: 3px solid @clear-red;
+}
+.picker__button--close:before {
+    content: "\D7"; // ×
+    top: -.1em;
+    vertical-align: top;
+    font-size: 1.1em;
+    margin-right: .35em;
+    color: @border-grey;
+}
+
+// Today when “disabled”.
+.picker__button--today[disabled],
+.picker__button--today[disabled]:hover {
+    .picker-item-disabled;
+}
+.picker__button--today[disabled]:before {
+    border-top-color: @disabled-tag;
+}
+
+
+/* ==========================================================================
+   $BASE-TIME-PICKER
+   ========================================================================== */
+
+/**
+ * The list of times.
+ */
+.picker__list {
+    list-style: none;
+    padding: 0.75em 0 4.2em;
+    margin: 0;
+}
+
+
+/**
+ * The times on the clock.
+ */
+.picker__list-item {
+    border-bottom: 1px solid @border-grey-light;
+    border-top: 1px solid @border-grey-light;
+    margin-bottom: -1px; // Prevent border from doubling up.
+    position: relative;
+    background: @bg-white;
+    padding: .75em 1.25em;
+
+    // For `large` screens, reduce the padding to show more in view.
+    @media ( min-height: @breakpoint-large ) {
+        padding: .5em 1em;
+    }
+}
+
+/* Hovered time */
+.picker__list-item:hover {
+    .picker-item-hovered;
+    border-color: @blue;
+    z-index: 10;
+}
+
+/* Highlighted and hovered/focused time */
+.picker__list-item--highlighted {
+    .picker-item-highlighted;
+    z-index: 10;
+}
+.picker__list-item--highlighted:hover,
+.picker--focused .picker__list-item--highlighted {
+    .picker-item-hovered;
+}
+
+/* Selected and hovered/focused time */
+.picker__list-item--selected,
+.picker__list-item--selected:hover,
+.picker--focused .picker__list-item--selected {
+    .picker-item-selected;
+    z-index: 10;
+}
+
+/* Disabled time */
+.picker__list-item--disabled,
+.picker__list-item--disabled:hover,
+.picker--focused .picker__list-item--disabled {
+    .picker-item-disabled;
+    border-color: @border-grey-light;
+    z-index: auto;
+}
+
+
+
+
+/**
+ * The clear button
+ */
+.picker--time {
+
+    .picker__button--clear {
+        display: block;
+        width: 80%;
+        margin: 1em auto 0;
+        padding: 1em 1.25em;
+
+        background: none;
+        border: 0;
+
+        font-weight: 500;
+        font-size: .67em;
+        text-align: center;
+        text-transform: uppercase;
+        color: #666;
+    }
+
+    .picker__button--clear:hover,
+    .picker__button--clear:focus {
+        .picker-item-hovered;
+        background: @clear-red;
+        border-color: @clear-red;
+        cursor: pointer;
+        color: @white;
+        outline: none;
+    }
+
+    .picker__button--clear:before {
+        top: -.25em;
+        color: #666;
+        font-size: 1.25em;
+        font-weight: bold;
+    }
+
+    .picker__button--clear:hover:before,
+    .picker__button--clear:focus:before {
+        color: @white;
+        border-color: @white;
+    }
+}
+
+
+/*!
+ * Default mobile-first, responsive styling for pickadate.js
+ * Demo: http://amsul.github.io/pickadate.js
+ */
+
+/**
+ * Note: the root picker element should *NOT* be styled more than what’s here.
+ */
+.picker {}
+
+
+/**
+ * Make the holder and frame fullscreen.
+ */
+.picker__holder,
+.picker__frame {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    // Nudge everything off-screen to begin with.
+    transform: translateY(100%);
+}
+
+
+/**
+ * The holder should overlay the entire screen.
+ */
+.picker__holder {
+
+    // Fill the screen and fix the position.
+    position: fixed;
+
+    // Fade out the background, then immediately shift the holder out of view.
+    // transition: background @speed-animate-in ease-out, transform 0s @speed-animate-in;
+
+    // Avoid flickering of the page on webkit browsers
+    -webkit-backface-visibility: hidden;
+}
+
+
+
+/**
+ * The frame that bounds the box contents of the picker.
+ */
+.picker__frame {
+
+    position: absolute;
+
+    // Specify the min & max widths and center align it.
+    margin: 0 auto;
+    min-width: @picker-min-width;
+    max-width: @picker-max-width;
+    width: 100%; // For IE9 & 10 to keep it centered.
+
+    // Hide it to begin with.
+    .opacity( 0 );
+
+    // Animate the frame in and out of view.
+    // transition: all @speed-animate-in ease-out;
+
+    // For `small` screens...
+    @media ( min-height: @breakpoint-small ) {
+
+        // Reveal what’s beyond to allow drop shadows, et al.
+        overflow: visible;
+
+        // Align to the bottom edge instead of top.
+        // top: auto;
+        top: 100px;
+        bottom: -100%;
+
+        // Prevent it from overflowing over the top edge.
+        max-height: 80%;
+    }
+
+    // For `medium` screens...
+    @media ( min-height: @breakpoint-medium ) {
+
+        // Move away from the bottom edge.
+        margin-bottom: 7.5%;
+    }
+}
+
+/**
+ * The wrapper sets the stage to vertically align the box contents.
+ */
+.picker__wrap {
+    display: table;
+    width: 100%;
+    height: 100%;
+
+    // For `small` screens, remove the “middle-aligned” styling
+    @media ( min-height: @breakpoint-small ) {
+        display: block;
+    }
+}
+
+
+
+/**
+ * The box contains all the picker contents.
+ */
+.picker__box {
+    background: @bg-white;
+
+    // To start with, vertically align to center
+    display: table-cell;
+    vertical-align: middle;
+
+    // For `tiny` screens, increase the font size a bit
+    @media ( min-height: @breakpoint-tiny ) {
+        font-size: 1.25em;
+    }
+
+    // For `small` screens...
+    @media ( min-height: @breakpoint-small ) {
+
+        // Remove the “middle-aligned” styling
+        display: block;
+
+        // Increase the font size a bit more
+        font-size: 1.33em;
+
+        // Add the borders except the bottom one
+        border: 1px solid @border-grey;
+        border-top-color: lighten( @border-grey, 7% );
+        border-bottom-width: 0;
+
+        // Make ‘em rounded at the top corners
+        border-radius: @picker-border-radius @picker-border-radius 0 0;
+
+        // And finally, add a nice shadow
+        box-shadow: @picker-box-shadow;
+    }
+
+    // For `medium` screens...
+    @media ( min-height: @breakpoint-medium ) {
+
+        // Increase the font size.
+        font-size: 1.5em;
+
+        // Reveal all borders and round all corners.
+        border-bottom-width: 1px;
+        border-radius: @picker-border-radius;
+    }
+}
+
+
+/**
+ * When the picker opens...
+ */
+.picker--opened {
+
+    // Immediately move the holder to the top edge then fade in an overlay
+    .picker__holder {
+
+        // Move it to the top edge
+        transform: translateY(0);
+
+        // Show a translucent black background (order is important for IE)
+        background: transparent;
+        -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#1E000000,endColorstr=#1E000000)"; // IE8
+              zoom: 1;
+        background: rgba(0,0,0,.32); // Normal browsers
+
+        // Animate in the background
+        // transition: background @speed-animate-in ease-out;
+    }
+
+
+    // Smoothly move the content to the top edge while fading it in
+    .picker__frame {
+
+        // Move to the top edge
+        transform: translateY(0);
+
+        // Ånd then reveal the content: ;
+        .opacity( 1 );
+
+        // For `small` screens, move to the bottom edge instead
+        @media ( min-height: @breakpoint-small ) {
+            // top: auto;
+            top: 100px;
+            bottom: 0;
+        }
+    }
+}
+
+
+
+/* ==========================================================================
+   $DEFAULT-TIME-PICKER
+   ========================================================================== */
+
+/**
+ * The frame the bounds the time picker.
+ */
+.picker--time .picker__frame {
+
+    // Adjust the min & max widths.
+    min-width: @time-min-width;
+    max-width: @time-max-width;
+}
+
+
+/**
+ * The picker box.
+ */
+.picker--time .picker__box {
+
+    // Keep the font-size small to show more in view.
+    font-size: 1em;
+
+    // Add a slight background color.
+    background: @bg-grey-light;
+
+    // Remove the side paddings.
+    padding: 0;
+
+    // For `medium` screens, move it away from the bottom edge of the screen.
+    @media ( min-height: @breakpoint-medium ) {
+        margin-bottom: 5em;
+    }
+}

@@ -1,16 +1,20 @@
 var gulp = require("gulp");
 var babel = require("gulp-babel");
 var less = require("gulp-less");
+var path = require('path');
+var plumber = require('gulp-plumber');
 
 gulp.task("babel", function () {
   return gulp.src(["src/javascript/**/*.js"], { base: 'src' })
+    .pipe(plumber())
     .pipe(babel())
     .pipe(gulp.dest("dist"));
 });
 
 gulp.task("less", function() {
-  return gulp.src(["src/less/**/*.less"], { base: 'src/less'})
-    .pipe(less())
+  return gulp.src(["src/less/app.less"], { base: 'src/less'})
+    .pipe(plumber())
+    .pipe(less({paths: [path.join(__dirname, 'node_modules')]}))
     .pipe(gulp.dest("dist/css"));
 })
 

@@ -1,0 +1,15 @@
+{
+  "main": "dist/javascript/window.js",
+  "dependencies": {
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.2.1",
+    "gulp-less": "^3.0.3",
+    "gulp-watch": "^4.3.5",
+    "leveldown": "^1.4.1",
+    "memdown": "^1.1.0",
+    "moment": "^2.10.6",
+    "pouchdb": "^4.0.3",
+    "react": "^0.13.3",
+    "react-router": "^1.0.0-rc1"
+  }
+}

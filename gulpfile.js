@@ -1,18 +1,28 @@
 var gulp = require("gulp");
 var babel = require("gulp-babel");
 var less = require("gulp-less");
-var path = require('path');
+var watch = require("gulp-watch");
+var print = require("gulp-print");
 var plumber = require('gulp-plumber');
+var duration = require('gulp-duration');
+var path = require('path');
+
+var babelize = function (file) {
+  return gulp.src(file, { base: 'src' })
+      .pipe(duration("transpiling " + (Array.isArray(file) ? file.join(', ') : file)))
+      .pipe(plumber())
+      .pipe(babel())
+      .pipe(gulp.dest("dist"));
+}
+
 
 gulp.task("babel", function () {
-  return gulp.src(["src/javascript/**/*.js"], { base: 'src' })
-    .pipe(plumber())
-    .pipe(babel())
-    .pipe(gulp.dest("dist"));
+  return babelize(["src/javascript/**/*.js"]);
 });
 
 gulp.task("less", function() {
   return gulp.src(["src/less/app.less"], { base: 'src/less'})
+    .pipe(watch("src/less/**/*.less"))
     .pipe(plumber())
     .pipe(less({paths: [path.join(__dirname, 'node_modules')]}))
     .pipe(gulp.dest("dist/css"));
@@ -28,8 +38,12 @@ gulp.task('copy-fonts', function() {
     .pipe(gulp.dest('dist/fonts'));
 });
 
-gulp.task('watch-babel', function() {
-  return gulp.watch(["src/javascript/**/*.js"], ["babel"]);
+gulp.task("watch-babel", function () {
+  return watch("src/javascript/**/*.js", function (obj) {
+    var file = path.relative(__dirname, obj.path);
+    console.log(file);
+    return babelize(file);
+  });
 });
 
 gulp.task('watch-less', function() {
@@ -50,7 +64,7 @@ gulp.task('watch', [
   'copy-html',
   'watch-copy-html',
   'less',
-  'watch-less',
+  //'watch-less',
   'copy-fonts',
   'watch-copy-fonts'
 ]);

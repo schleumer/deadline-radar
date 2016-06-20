@@ -8,6 +8,7 @@ class TextInput extends React.Component {
     this.displayName = 'TextInput';
   }
   render() {
+    // @todo helper
     var label = this.props.label || null;
     var placeholder = this.props.placeholder || label;
 
